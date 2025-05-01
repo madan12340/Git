@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Page</title>
+    <link rel="stylesheet" href="CSS/reg.css"
+</head>
+<body>
+    <h1>Register Here</h1>
+    <form action="register-process.php" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <button type="submit" style="padding: 10px 20px; font-size: 16px;">Register</button>
+    </form>
+
+
+</body>
+</html>
+-----------------------------------------------------------------------------
+
+
+
+
+
+
+<?php
+// Database connection
+$host = "sdb-64.hosting.stackcp.net"; // Your server
+$username = "admin-4298";             // Your database username
+$password = "Singham@11";             // Your database password
+$dbname = "awsdatabase-35303337a502";    // Your database name
+
+$conn = new mysqli($host, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Check if the form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Sanitize and validate input
+    $username = $conn->real_escape_string($_POST['username']);
+    $email = $conn->real_escape_string($_POST['email']);
+    $password = $conn->real_escape_string($_POST['password']);
+
+    // Hash the password
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+    // Insert data into the database
+    $sql = "INSERT INTO users (username, email, password) VALUES ('$username', '$email', '$hashed_password')";
+
+    if ($conn->query($sql) === TRUE) {
+         echo "
+        <div style='text-align: center; margin-top: 50px;'>
+            <p style='color: green; font-size: 18px;'>Registration successful!</p>
+            <a href='login.html' style='text-decoration: none; color: blue; font-weight: bold;'>Click here to Login</a>
+        </div>";
+    } else {
+        // Check if error is due to duplicate email
+        if ($conn->errno == 1062) {
+           echo "<p style='color:red;'>Email already registered. Please use a different email.</p>";
+        } else {
+            // For other errors
+            echo "<p style='color:red;'>Error: " . $conn->error . "</p>";
+        }
+    }
+}
+
+
+// Close connection
+$conn->close();
+?>
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="CSS/log.css">
+</head>
+<body>
+    <h2>Login</h2>
+    <form action="login.php" method="POST">
+        <label for="email">Email:</label><br>
+        <input type="email" name="email" id="email" required><br><br>
+        
+        <label for="password">Password:</label><br>
+        <input type="password" name="password" id="password" required><br><br>
+        
+        <label for="actkey">Activation Key:</label><br>
+        <input type="actkey" name="actkey" id="actkey" required><br><br>
+        
+        <button type="submit">Login</button>
+    </form>
+        <!-- Link back to index.php -->
+    <p> <a href="forgot.html">Forgot password</a>.</p>
+</body>
+</html>
+----------------------------------------------------------
+
+<?php
+// Database connection
+$host = "sdb-64.hosting.stackcp.net"; // Your server
+$username = "admin-4298";             // Your database username
+$password = "Singham@11";             // Your database password
+$dbname = "awsdatabase-35303337a502";    // Your database name
+
+
+
+$conn = new mysqli($host, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Check if the form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Sanitize and validate input
+    $email = $conn->real_escape_string($_POST['email']);
+    $password = $conn->real_escape_string($_POST['password']);
+    $actkey = $conn->real_escape_string($_POST['actkey']);
+
+    // Query to check email, password, and actkey
+    $sql = "SELECT * FROM users WHERE email = '$email' AND actkey = '$actkey'";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        // Fetch user data
+        $row = $result->fetch_assoc();
+
+        // Verify password
+        if (password_verify($password, $row['password'])) {
+            // Successful login
+            header("Location: Homepage.html");
+            exit;
+        } else {
+            // Incorrect password
+            echo "<p style='color:red;'>Invalid email, password, or activation key.</p>";
+        }
+    } else {
+        // Email or activation key not found
+        echo "<p style='color:red;'>Invalid email, password, or activation key.</p>";
+    }
+}
+
+// Close connection
+$conn->close();
+?>
+---------------------------
+
+count registered users
+
+
+ <!-- MAIN CSS -->
+     <link rel="stylesheet" href="css/tooplate-style.css">
+     
+           <script>
+        // Function to fetch the user count from user_count.php
+        function getUserCount() {
+            // Create a new XMLHttpRequest object
+            var xhr = new XMLHttpRequest();
+            
+            // Configure it: GET-request for the user_count.php file
+            xhr.open('GET', 'user_count.php', true);
+            
+            // Set up a function that is called when the request is complete
+            xhr.onload = function () {
+                if (xhr.status == 200) {
+                    // On successful response, update the page with the user count
+                    document.getElementById('user-count').textContent = xhr.responseText;
+                }
+            };
+            
+            // Send the request to the server
+            xhr.send();
+        }
+
+        // Call the function when the page loads
+        window.onload = function() {
+            getUserCount();
+        };
+    </script>
